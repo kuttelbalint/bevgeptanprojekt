@@ -28,10 +28,10 @@ rf = RandomForestClassifier(random_state=42)
 
 # Hyperparameters grid
 param_grid = {
-    'n_estimators': [150, 200, 250, 300],
-    'max_depth': [20, 30, 40, 50],         # Assuming initial best was around 30
-    'min_samples_split': [2, 3, 4],        # More granular
-    'min_samples_leaf': [1, 2, 3],         # More granular
+    'n_estimators': [10 ,100,150, 200, 250, 300, 350, 400],
+    'max_depth': [20, 30, 40, 50],         
+    'min_samples_split': [2, 3, 4],        
+    'min_samples_leaf': [1, 2, 3],       
     'bootstrap': [True]  
 }
 

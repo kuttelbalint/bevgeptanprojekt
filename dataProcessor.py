@@ -1,7 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 
 class DataProcessor:
@@ -9,7 +8,13 @@ class DataProcessor:
         self.file_path = file_path
         self.label_encoder = LabelEncoder()
         self.scaler = StandardScaler()
-        self.imputer = SimpleImputer(strategy='mean')  # or median, mode
+        self.imputer_numeric = SimpleImputer(strategy='mean')  # For numeric columns
+        self.imputer_categorical = SimpleImputer(strategy='most_frequent')  # For categorical columns
+
+    def balance_data(self, X, y):
+        smote = SMOTE()
+        X_balanced, y_balanced = smote.fit_resample(X, y)
+        return X_balanced, y_balanced
 
     def get_cleaned_df(self):
         # Read CSV
@@ -18,20 +23,35 @@ class DataProcessor:
         # Data cleaning
         df_cleaned = df.drop_duplicates()
 
-        # Handling missing values
-        df_cleaned = self.imputer.fit_transform(df_cleaned)
+        # Separate numeric and categorical columns
+        numeric_cols = df_cleaned.select_dtypes(include=['int64', 'float64']).columns
+        categorical_cols = df_cleaned.select_dtypes(include=['object']).columns
 
-        # Label encoding
-        for column in df_cleaned.columns:
-            if df_cleaned[column].dtype == 'object':
-                df_cleaned[column] = self.label_encoder.fit_transform(df_cleaned[column])
+        print("Numeric Columns:", numeric_cols)
+        print("Categorical Columns:", categorical_cols)
+
+        # Check if there are numeric columns
+        if len(numeric_cols) > 0:
+            # Handling missing values for numeric columns
+            df_cleaned[numeric_cols] = self.imputer_numeric.fit_transform(df_cleaned[numeric_cols])
+        else:
+            print("No numeric columns to impute.")
+
+        # Check if there are categorical columns
+        if len(categorical_cols) > 0:
+            # Handling missing values for categorical columns
+            df_cleaned[categorical_cols] = self.imputer_categorical.fit_transform(df_cleaned[categorical_cols])
+        else:
+            print("No categorical columns to impute.")
+
+        # Label encoding for categorical columns
+        for column in categorical_cols:
+            df_cleaned[column] = self.label_encoder.fit_transform(df_cleaned[column])
 
         # Feature Scaling
-        df_cleaned = pd.DataFrame(self.scaler.fit_transform(df_cleaned), columns=df_cleaned.columns)
+        if len(numeric_cols) > 0:
+            df_cleaned[numeric_cols] = pd.DataFrame(self.scaler.fit_transform(df_cleaned[numeric_cols]), columns=numeric_cols)
+        else:
+            print("No numeric columns to scale.")
 
         return df_cleaned
-
-    def balance_data(self, X, y):
-        smote = SMOTE()
-        X_balanced, y_balanced = smote.fit_resample(X, y)
-        return X_balanced, y_balanced
