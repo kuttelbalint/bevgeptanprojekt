@@ -17,27 +17,19 @@ class DataProcessor:
         return X_balanced, y_balanced
 
     def get_cleaned_df(self):
-        # Read CSV
         df = pd.read_csv(self.file_path)
-
-        # Data cleaning
+        
         df_cleaned = df.drop_duplicates()
 
-        # Separate numeric and categorical columns
         numeric_cols = df_cleaned.select_dtypes(include=['int64', 'float64']).columns
         categorical_cols = df_cleaned.select_dtypes(include=['object']).columns
 
-        print("Numeric Columns:", numeric_cols)
-        print("Categorical Columns:", categorical_cols)
 
-        # Check if there are numeric columns
         if len(numeric_cols) > 0:
-            # Handling missing values for numeric columns
             df_cleaned[numeric_cols] = self.imputer_numeric.fit_transform(df_cleaned[numeric_cols])
         else:
             print("No numeric columns to impute.")
 
-        # Check if there are categorical columns
         if len(categorical_cols) > 0:
             # Handling missing values for categorical columns
             df_cleaned[categorical_cols] = self.imputer_categorical.fit_transform(df_cleaned[categorical_cols])
