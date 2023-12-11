@@ -1,6 +1,7 @@
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.impute import SimpleImputer
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+from sklearn.impute import KNNImputer, SimpleImputer
 from imblearn.over_sampling import SMOTE
 
 class DataProcessor:
@@ -15,7 +16,18 @@ class DataProcessor:
         smote = SMOTE()
         X_balanced, y_balanced = smote.fit_resample(X, y)
         return X_balanced, y_balanced
+    
+    def advanced_impute(self, df):
+        knn_imputer = KNNImputer(n_neighbors=5)
+        return pd.DataFrame(knn_imputer.fit_transform(df), columns=df.columns)
 
+    def one_hot_encode(self, df, categorical_cols):
+        encoder = OneHotEncoder()
+        encoded_df = pd.DataFrame(encoder.fit_transform(df[categorical_cols]).toarray())
+        df = df.drop(categorical_cols, axis=1)
+        df = df.join(encoded_df)
+        return df
+    
     def get_cleaned_df(self):
         df = pd.read_csv(self.file_path)
         
@@ -43,5 +55,12 @@ class DataProcessor:
             df_cleaned[numeric_cols] = pd.DataFrame(self.scaler.fit_transform(df_cleaned[numeric_cols]), columns=numeric_cols)
         else:
             print("No numeric columns to scale.")
+
+        # Advanced imputation (optional)
+        df_cleaned = self.advanced_impute(df_cleaned)
+
+        # One-hot encoding (optional)
+        categorical_cols = df_cleaned.select_dtypes(include=['object']).columns
+        df_cleaned = self.one_hot_encode(df_cleaned, categorical_cols)
 
         return df_cleaned

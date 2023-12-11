@@ -15,19 +15,21 @@ df = processor.get_cleaned_df()
 X = df.drop('population', axis=1)
 y = df['population']
 X_balanced, y_balanced = processor.balance_data(X, y)
-X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_balanced, y_balanced, test_size=0.1, random_state=42)
 
 clf = DecisionTreeClassifier(random_state=42)
 
 # Grid Search
 
 param_grid = {
-    'max_depth': [10, 20, 30, 40, 100, 250],  # More focused range
-    'min_samples_split': [2, 10, 20, 50, 100],  # Start from 2
-    'min_samples_leaf': [1, 5, 10, 20],  # Start from 1
+    'max_depth': [10, 20, 30, 40, 100, 250],
+    'min_samples_split': [2, 10, 20, 50, 100],
+    'min_samples_leaf': [1, 5, 10, 20],
     'criterion': ['gini', 'entropy'],
-    'max_features': ['auto', 'sqrt', 'log2'],  # Removed None
-    'splitter': ['best', 'random']
+    'max_features': ['auto', 'sqrt', 'log2'],
+    'splitter': ['best', 'random'],
+    'class_weight': [None, 'balanced'],  # Include class weights
+    'min_impurity_decrease': [0.0, 0.01, 0.02],  # Pruning parameter
 }
 
 
@@ -48,7 +50,7 @@ param_grid = {
 grid_search.fit(X_train, y_train)
 best_params = grid_search.best_params_ """
 random_search = RandomizedSearchCV(estimator=clf, param_distributions=param_grid, 
-                                   n_iter=500, cv=5, verbose=2, random_state=42, n_jobs=-1)
+                                   n_iter=1000, cv=5, verbose=2, random_state=42, n_jobs=-1)
 random_search.fit(X_train, y_train)
 best_params = random_search.best_params_
 
