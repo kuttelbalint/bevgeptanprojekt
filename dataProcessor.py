@@ -8,8 +8,8 @@ class DataProcessor:
         self.file_path = file_path
         self.label_encoder = LabelEncoder()
         self.scaler = StandardScaler()
-        self.imputer_numeric = SimpleImputer(strategy='mean')  # For numeric columns
-        self.imputer_categorical = SimpleImputer(strategy='most_frequent')  # For categorical columns
+        self.imputer_numeric = SimpleImputer(strategy='mean')
+        self.imputer_categorical = SimpleImputer(strategy='most_frequent')
 
     def balance_data(self, X, y):
         smote = SMOTE()
@@ -31,12 +31,10 @@ class DataProcessor:
             print("No numeric columns to impute.")
 
         if len(categorical_cols) > 0:
-            # Handling missing values for categorical columns
             df_cleaned[categorical_cols] = self.imputer_categorical.fit_transform(df_cleaned[categorical_cols])
         else:
             print("No categorical columns to impute.")
 
-        # Label encoding for categorical columns
         for column in categorical_cols:
             df_cleaned[column] = self.label_encoder.fit_transform(df_cleaned[column])
 

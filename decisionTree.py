@@ -12,7 +12,6 @@ df = processor.get_cleaned_df()
 
 # region Decision Tree
 
-
 X = df.drop('population', axis=1)
 y = df['population']
 X_balanced, y_balanced = processor.balance_data(X, y)
@@ -56,8 +55,6 @@ best_params = random_search.best_params_
 best_clf = DecisionTreeClassifier(**best_params, random_state=42)
 best_clf.fit(X_train, y_train)
 y_pred_optimized = best_clf.predict(X_test)
-
-
 
 
 accuracy = accuracy_score(y_test, y_pred_optimized)
